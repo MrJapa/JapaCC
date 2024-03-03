@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-o@vm&&v8i8rgmu%(tegdqr5tq6l)rmt^7nip@_l_e%at75s8mi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['www.japa.cc', 'japa.cc',]
+ALLOWED_HOSTS = ['www.japa.cc', 'japa.cc', '0.0.0.0', '10.0.0.21']
 
 AUTH_USER_MODEL = 'Japa.CustomUser'
 
@@ -50,6 +50,10 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'pwa',
+    'whitenoise.runserver_nostatic',
+    'gunicorn',
+    'psycopg2',
+    'dj_database_url',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap4'
@@ -106,7 +110,7 @@ WSGI_APPLICATION = 'Web.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': BASE_DIR / 'ciba',
+        'NAME': 'ciba',
     }
 }
 
