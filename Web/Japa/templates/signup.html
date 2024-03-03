@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Sign up{% endblock %}
+{% block login %}
+<div class="d-flex justify-content-center align-items-center" style="margin-top: 10px;">
+    <div class="card shadow-lg" style="width: 40%; border-radius: .5rem;">
+        <div class="shadow">
+            <p class="text-center fs-2 fw-bold">Sign up</p>
+        </div>
+        <form method="post" class="justify-content-center" style="padding: 2rem;">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="InputFirstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="InputFirstName" name="first_name">
+            </div>
+            <div class="mb-3">
+                <label for="InputLastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="InputLastName" name="last_name">
+            </div>
+            <div class="mb-3">
+                <label for="InputEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="InputEmail" name="email">
+            </div>
+            <div class="mb-3">
+                <label for="InputPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="InputPassword" name="password">
+            </div>
+            <div class="mb-3">
+                <label for="InputPhone" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="InputPhone" name="phone_number">
+            </div>
+            <div class="mb-3">
+                <label for="InputAddress" class="form-label">Address</label>
+                <input type="text" class="form-control" id="InputAddress" name="address">
+            </div>
+            <div class="mb-3">
+                <label for="InputAddressType" class="form-label">Address Type</label>
+                <select class="form-control" id="InputAddressType" name="address_type">
+                    <option value="House">House</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Office">Office</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="InputDoorNumber" class="form-label">House/Door Number</label>
+                <input type="text" class="form-control" id="InputDoorNumber" name="door_number">
+            </div>
+            <button type="submit" class="btn btn-primary">Create user</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

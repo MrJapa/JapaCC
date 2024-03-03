@@ -1,0 +1,76 @@
+body {
+    font-family: 'Roboto', sans-serif !important;
+}
+
+h4 {
+    font-family: 'Roboto', sans-serif !important;
+}
+
+.btn-outline-success{
+    color: #22D6B4 !important;
+    border-color: #22D6B4;
+}
+
+.btn-outline-success:hover{
+    background-color: #22D6B4 !important;
+    color: black !important;
+}
+
+.btn-outline-success:active:focus{
+    box-shadow: 0 0 0 0.25rem rgba(7, 187, 35, .25) !important;
+}
+
+.btn-outline-success:focus{
+    box-shadow: 0 0 0 0.25rem rgba(7, 187, 35, .25) !important;
+}
+
+li {
+    list-style-type: none;
+}
+
+.icon::before {
+    margin-right: 5px;
+}
+
+.icons::before {
+    margin-right: -5px;
+}
+
+.menucard:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 0 11px rgba(33,33,33,.2); 
+}
+
+.menucard {
+    text-decoration: none !important; /* Removes the underline */
+    color: inherit !important; /* Makes the link color the same as the surrounding text */
+}
+
+.menucard a:hover {
+    text-decoration: none !important; /* Removes the underline on hover */
+    color: inherit !important; /* Keeps the link color the same on hover */
+}
+
+.six-columns {
+    display: flex;
+    flex-wrap: wrap;
+}
+.six-columns > .col {
+    flex: 0 0 calc(100% / 6);
+    max-width: calc(100% / 6);
+}
+
+.btn-primary {
+    background-color: #009DE0 !important;
+    border-color: #009DE0 !important;
+}
+
+.horizontal-scrollable > .row {
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.horizontal-scrollable > .row > .col {
+    display: inline-block;
+    float: none;
+}

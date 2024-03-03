@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% block title %} Burro - Ordre {% endblock %}
+
+{% block checkout %}
+{% load static %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBW_jesOr5SWZqSnXfIsCyEN0Ee4gYLhN8&callback=initMap" async defer></script>
+
+<div class="container overflow-hidden text-start w-75">
+    <div class="card"> 
+        <div id="map" style="object-fit: cover; height: 200px;"></div>
+        <h2>Check ud</h2>
+        <h3>{{Restauranter.Navn}}</h3>
+        <p>{{Restauranter.Adresse}}</p>
+        <div class="card-body"> 
+            <div class="row">
+                <div class="col-lg-7 col-md-6">
+                    <h4 class="card-title">Leveringsmetode og tid</h4>
+                    <p class="card-text" style="font-weight: bold;">Leveres til: </p>
+                    {% if user.is_authenticated %}
+                        <p class="card-text">{{user.address}}</p>
+                        <p id="travelTime"></p>
+                    {% else %}
+                        <p class="card-text">Log ind for at ændre leveringsadresse</p>
+                        <span id="location" class="ms-3 bi-house-door-fill"></span>
+                    {% endif %}
+                    <hr class="solid"></hr>
+                    <ul id="items"> 
+                        <!-- Dynamic content will be added here -->
+                    </ul> 
+                </div>
+                <div class="col-lg-5 col-md-4">
+                    <div class="card ">                                  
+                        <div class="card-body "> 
+                            <h4 class="card-title">Priser i DKK</h4> 
+                            <h6 class="card-subtitle mb-2 text-muted">inkl. afgifter (hvis relevant)</h6>
+                            <div class="row">
+                                <div class="col-md-4 flex-grow-1"> 
+                                    <p style="font-weight: bold;">Varens pris</p>
+                                    <p style="font-weight: bold;">Levering</p>
+                                    <p style="font-weight: bold;">Servicegebyr</p> 
+                                </div>
+                                <div class="col-md-4"> 
+                                    <p class="actual-price"></p>
+                                    <p class="delivery-fee"></p>
+                                    <p class="service-fee"></p> 
+                                </div>
+                            </div>
+                            <hr class="solid"></hr>
+                            <div class="row">
+                                <div class="col-md-4 flex-grow-1"> 
+                                    <p style="font-weight: bold;">I alt</p>
+                                </div>
+                                <div class="col-md-4"> 
+                                    <p class="total-price"></p>
+                                </div>
+                            </div>                                                                  
+                            <a href="#" class="btn btn-primary">Klik for at bestille</a> 
+                        </div>                                 
+                    </div>                                     
+                    </div>                                                          
+                </div>
+            </div>    
+            </div>                 
+        </div>                 
+    </div>
+</div>
+
+<script>
+
+function initMap() {
+    var restaurantAddress = "{{ Restauranter.Adresse }}";
+    var destinationAddress = "{{ user.address }}";
+
+    var geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: restaurantAddress }, function(results1, status1) {
+        if (status1 === 'OK') {
+            var restaurantLocation = results1[0].geometry.location;
+
+            geocoder.geocode({ address: destinationAddress }, function(results2, status2) {
+                if (status2 === 'OK') {
+                    var destinationLocation = results2[0].geometry.location;
+
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                        center: restaurantLocation,
+                        zoom: 15
+                    });
+
+                    new google.maps.Marker({
+                        map: map,
+                        position: restaurantLocation,
+                        title: '{{ Restauranter.Navn }}'
+                    });
+
+                    new google.maps.Marker({
+                        map: map,
+                        position: destinationLocation,
+                        title: 'Destination'
+                    });
+
+                    var service = new google.maps.DistanceMatrixService();
+                    service.getDistanceMatrix({
+                        origins: [restaurantAddress],
+                        destinations: [destinationAddress],
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        unitSystem: google.maps.UnitSystem.METRIC,
+                        avoidHighways: false,
+                        avoidTolls: false
+                    }, function(response, status) {
+                        if (status == 'OK') {
+                            var distance = response.rows[0].elements[0].distance.text;
+                            var durationInSeconds = response.rows[0].elements[0].duration.value;
+                            var roundedDurationInSeconds = Math.ceil(durationInSeconds / 300) * 300; // Round up to the next multiple of 300 seconds (5 minutes)
+                            var durationInMinutes = Math.ceil(roundedDurationInSeconds / 60); // Convert to minutes
+                            var finalDuration = durationInMinutes + 5; // Add an additional 5 minutes
+                            document.getElementById('travelTime').innerHTML = "Levering om: " + durationInMinutes + " - " + finalDuration + " minutes (" + distance + ")";
+                        } else {
+                            console.error('Error calculating distance: ' + status);
+                        }
+                    });
+                } else {
+                    console.error('Geocode was not successful for the destination address: ' + status2);
+                }
+            });
+        } else {
+            console.error('Geocode was not successful for the restaurant address: ' + status1);
+        }
+    });
+}
+
+// Function to create and append a new item card
+function createItemCard(itemName, itemCount, itemDescription, itemPrice, itemImage) {
+    // Create a div element for the card
+    var cardDiv = document.createElement("div");
+    cardDiv.className = "align-items-center card flex-row";
+
+    // Create an img element for the item image
+    var img = document.createElement("img");
+    img.src = "data:image/jpeg;base64," + itemImage;
+    img.alt = "Item Image";
+    img.className = "card-img-top w-auto";
+    img.width = 0; // Adjust as needed
+    img.height = 100; // Adjust as needed
+
+    // Create a div element for the card body
+    var cardBodyDiv = document.createElement("div");
+    cardBodyDiv.className = "card-body";
+
+    // Create a paragraph element for the "X" button
+    var closeButton = document.createElement("p");
+    closeButton.textContent = "X";
+    closeButton.className = "text-end";
+    closeButton.style.cursor = "pointer";
+    closeButton.onclick = function() {
+        // Remove one instance of the item from local storage
+        removeOneItemFromLocalStorage(itemName);
+    };
+
+    // Create a heading element for the item name
+    var itemNameHeading = document.createElement("h4");
+    itemNameHeading.className = "card-title";
+
+    // Append item name with count if count > 1
+    if (itemCount > 1) {
+        itemNameHeading.textContent = itemName + " (" + itemCount + ")";
+    } else {
+        itemNameHeading.textContent = itemName;
+    }
+
+    // Create a paragraph element for the item description
+    var itemDescriptionParagraph = document.createElement("p");
+    itemDescriptionParagraph.className = "card-text";
+    itemDescriptionParagraph.textContent = itemDescription;
+
+    // Create a paragraph element for the item price
+    var itemPriceParagraph = document.createElement("p");
+    itemPriceParagraph.className = "card-text";
+    itemPriceParagraph.textContent = parseFloat(itemPrice).toFixed(2) + " kr.";
+
+    // Append elements to the card body div
+    cardBodyDiv.appendChild(closeButton);
+    cardBodyDiv.appendChild(itemNameHeading);
+    cardBodyDiv.appendChild(itemDescriptionParagraph);
+    cardBodyDiv.appendChild(itemPriceParagraph);
+
+    // Append elements to the card div
+    cardDiv.appendChild(img);
+    cardDiv.appendChild(cardBodyDiv);
+
+    // Append the card div to the items list
+    itemsList.appendChild(cardDiv);
+}
+
+// Function to remove one instance of an item from local storage
+function removeOneItemFromLocalStorage(itemName) {
+    // Retrieve items from local storage
+    var items = JSON.parse(localStorage.getItem("items"));
+
+    // Find the index of the item with the given name
+    var index = items.findIndex(function(item) {
+        return item.MadNavn === itemName;
+    });
+
+    // Check if the item was found
+    if (index !== -1) {
+        // Remove one instance of the item
+        items.splice(index, 1);
+
+        // Save the updated items back to local storage
+        localStorage.setItem("items", JSON.stringify(items));
+
+        // Reload the page to reflect the changes
+        location.reload();
+    }
+}
+
+// Retrieve items from local storage
+var items = JSON.parse(localStorage.getItem("items"));
+
+// Get the div where we will add the item cards
+var itemsList = document.getElementById("items");
+
+// Check if items is not null
+if (items && items.length > 0) {
+    // Create a map to store the count of each item
+    var itemCounts = {};
+
+    // Total price of all items
+    var totalPrice = 0;
+
+    // Loop through each item in the array to count occurrences and create unique items
+    items.forEach(function(item) {
+        if (!itemCounts[item.MadNavn]) {
+            itemCounts[item.MadNavn] = 0;
+        }
+        itemCounts[item.MadNavn]++;
+        // Add the price of each item to the total price
+        totalPrice += parseFloat(item.MadPris);
+    });
+
+    // Delivery fee
+    var deliveryFee = parseFloat("{{Restauranter.Leveringsgebyr}}");
+
+    // Service fee
+    var serviceFee = 10.00; // Assuming service fee is always 10.00 kr.
+
+    // Calculate total price including delivery fee and service fee
+    var totalPriceWithFees = totalPrice + deliveryFee + serviceFee;
+
+    // Loop through each unique item in the map to create item cards
+    for (var itemName in itemCounts) {
+        // Get the count of the item
+        var count = itemCounts[itemName];
+
+        // Get the item associated with the itemName
+        var item = items.find(function(item) {
+            return item.MadNavn === itemName;
+        });
+
+        // Call the createItemCard function to create and append a new item card
+        createItemCard(itemName, count, item.MadBeskrivelse, item.MadPris, item.MadBillede);
+    }
+
+    // Update the actual price element with the total price
+    document.querySelector("p.actual-price").textContent = totalPrice.toFixed(2);
+    document.querySelector("p.delivery-fee").textContent = deliveryFee.toFixed(2);
+    document.querySelector("p.service-fee").textContent = serviceFee.toFixed(2);
+    document.querySelector("p.total-price").textContent = totalPriceWithFees.toFixed(2);
+} else {
+    console.log("No items in local storage or items is empty.");
+}
+
+
+</script>
+
+
+
+
+{% endblock %}

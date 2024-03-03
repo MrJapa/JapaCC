@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Manage{% endblock %}
+{% block management %}
+{% if user.is_superuser %}
+<div class="container-fluid my-3">
+    <h1 class="text-center">Manage</h1>
+</div>
+<div class="container text-center my-5">
+    <div class="row flex-auto justify-content-center">
+        {% include 'components/manage_card.html' with modal_id="exampleModal" modal_label="exampleModalLabel" modal_title="New Restaurant" form=restaurant_form form_name="restaurant_form" %}
+        {% include 'components/manage_card.html' with modal_id="foodModal" modal_label="foodModalLabel" modal_title="New Food" form=food_form form_name="food_form" %}
+        {% include 'components/manage_card.html' with modal_id="categoryModal" modal_label="categoryModalLabel" modal_title="New Category" form=category_form form_name="category_form" %}
+        {% include 'components/manage_card.html' with modal_id="underCategoryModal" modal_label="underCategoryModalLabel" modal_title="New Undercategory" form=undercategory_form form_name="undercategory_form" %}
+    </div>
+</div>
+
+{% include 'components/create_modal.html' with modal_id="exampleModal" modal_label="exampleModalLabel" modal_title="New Restaurant" form=restaurant_form form_name="restaurant_form" %}
+{% include 'components/create_modal.html' with modal_id="foodModal" modal_label="foodModalLabel" modal_title="New Food" form=food_form form_name="food_form" %}
+{% include 'components/create_modal.html' with modal_id="categoryModal" modal_label="categoryModalLabel" modal_title="New Category" form=category_form form_name="category_form" %}
+{% include 'components/create_modal.html' with modal_id="underCategoryModal" modal_label="underCategoryModalLabel" modal_title="New Undercategory" form=undercategory_form form_name="undercategory_form" %}
+{% else %}
+<h1>Not Authorized to enter this site</h1>
+{% endif %}
+{% endblock %}

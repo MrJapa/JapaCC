@@ -1,0 +1,45 @@
+{% load static %}
+<nav class="navbar navbar-light shadow-sm">
+    <div class="container">
+        <!-- Left Section -->
+        <a class="navbar-brand" href="{% url 'index'%}">
+            <img src="{% static 'images/logos/Burros.png' %}" alt="icon" width="150px" />
+        </a>
+
+        <!-- Center Section (Search Bar) -->
+        <form class="d-flex mx-auto">
+            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+        </form>
+
+        <!-- Right Section -->
+        <div class="d-flex justify-content-end">
+            {% if user.is_authenticated %}
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active text-end" href="#" id="navbarDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    {{user.first_name}} {{ user.last_name }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="#">Profil</a></li>
+                    <li><a class="dropdown-item" href="#">Indstillinger</a></li>
+                    <li>
+                        <hr class="dropdown-divider" />
+                    </li>
+                    {% if user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'manage' %}">Admin</a></li>
+                    {% endif %}
+                    <li>
+                        <a class="dropdown-item" href="{% url 'logout' %}">Log ud</a>
+                    </li>
+                </ul>
+                </div>
+            {% else %}
+                <div class="nav-item text-end">
+                    <a class="btn btn-primary" type="button" href="{% url 'login'%}">
+                        Login
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load division %}
+{% block title %}Home{% endblock %}
+
+{% block indexNavbar %}
+<div class="d-flex container-fluid justify-content-around">
+    <div class="justify-content-center mt-5">
+        <button class="btn btn-primary rounded-pill" style="background-color: #009DE0; border-color: #ffff;"><span
+                class="bi-globe-americas">&nbsp;&nbsp;Udforsk</span></button>
+        <button class="btn btn-outline-secondary rounded-pill" style="border-color: #ffff;"><span
+                class="">&nbsp;&nbsp;Restauranter</span></button>
+        <button class="btn btn-outline-secondary rounded-pill" style="border-color: #ffff;"><span
+                class="bi-shop-window">&nbsp;&nbsp;Butikker</span></button>
+    </div>
+</div>
+{% endblock %}
+
+{% block categoryblock %}
+<div>
+    <h1>Kategorier</h1>
+</div>
+<div class="d-flex container-fluid justify-content-center" style="overflow: auto;">
+    <div class="row flex-nowrap" style="overflow: auto;">
+        {% for Kategori in Kategorier %}
+        <div class="col my-3" style="width: 275px; flex: 0 0 auto;">
+            <div class="card menucard shadow-sm text-nowrap mb-2" style="border-radius: 5%; overflow-y: auto;">
+                <img class="bd-placeholder-img card-img-top" width="100%" height="100%"
+                    src="data:image/jpeg;base64,{{ Kategori.get_image }}" alt="{{ Kategori.navn }}"
+                    style="object-fit: cover;">
+                <div class="card-body">
+                    <div class="m-0">
+                        <div class="row m-0 g-0">
+                            <div class="col-10">
+                                <h4 class="text-break" style="text-wrap: nowrap; font-size: large;">{{ Kategori.Navn }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+{% block album %}
+<div>
+    <h1>Restauranter</h1>
+</div>
+<div class="album py-5 bg-body-tertiary">
+    <div class="d-flex container-fluid justify-content-center">
+        <div class="row justify-content-center row-cols-1 row-cols-sm-2 row-cols-md-5 m-0">
+            {% for Restaurant in Restauranter %}
+            <div class="col" style="min-width: 300px;">
+                <a class="menucard" href="{% url 'restaurant_detail' Navn=Restaurant.Navn %}">
+                    <div class="card menucard shadow-sm" style="border-radius: 5%; overflow: hidden;">
+                        <img class="bd-placeholder-img card-img-top" width="100%" height="200px"
+                            src="data:image/jpeg;base64,{{ Restaurant.get_image }}" alt="{{ Restaurant.Navn }}"
+                            style="object-fit: cover;">
+                        <div class="card-body">
+                            <div class="m-0">
+                                <div class="row m-0 g-0">
+                                    <div class="col-10">
+                                        <h4 class="text-break" style="text-wrap: nowrap; font-size: large;">{{ Restaurant.Navn }}</h4>
+                                        <p style="color: rgb(85, 84, 90);">{{ Restaurant.Beskrivelse }}</p>
+                                    </div>
+                                    <div class="col rounded m-0"
+                                        style="background-color: #EBF7FD; height: fit-content; width: 35px;">
+                                        <p class="text-center m-0"
+                                            style="color: #00A8E7; font-weight: 450; text-wrap: nowrap;">10-15</p>
+                                        <p class="text-center m-0" style="color: #00A8E7; font-weight:400;">min</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="d-flex align-items-center">
+                                <span class="bi-bicycle icon" style="color: #009DE0; font-weight: 500;">
+                                    {{ Restaurant.Leveringsgebyr|floatformat }} kr.</span>
+                                <span class="bi-dot icon"></span>
+                                {% for i in "xxxx" %}
+                                {% if forloop.counter <= Restaurant.Leveringsgebyr|floatformat|division:15 %} <span
+                                    class="bi-currency-dollar" style="font-size: small;"></span>
+                                    {% else %}
+                                    <span class="bi-currency-dollar"
+                                        style="font-size: small; color: rgba(0, 0, 0, 0.350);"></span>
+                                    {% endif %}
+                                    {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
