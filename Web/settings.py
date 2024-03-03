@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'pwa',
-    'whitenoise.runserver_nostatic',
     'gunicorn',
     'psycopg2',
     'dj_database_url',
@@ -68,7 +67,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whiteNoise.middleware.WhiteNoiseMiddleware',
 ]
 
 STATICFILES_DIRS = [
@@ -151,8 +149,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'Japa/static']
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_ROOT = [BASE_DIR / 'Japa/static/images']
 
