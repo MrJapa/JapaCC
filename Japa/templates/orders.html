@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %} Burro - Ordrer {% endblock %}
+
+{% block ordre %}
+
+{% if user.is_authenticated %}
+
+    <h1>My orders</h1>
+    {% if nybestilling.Courier.get_full_name == user.get_full_name %}
+    console.log("hej {{ user.get_full_name }}")
+    console.log("{{ nybestilling.Courier.get_full_name }}")
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Date</th>
+                <th scope="col">Restaurant</th>
+                <th scope="col">Customer Name</th>
+                <th scope="col">Delivery Address</th>
+                <th scope="col">Courier</th>
+            </tr>
+        </thead>
+        <tbody>
+                <tr>
+                    <th scope="row" class="orderId">{{ nybestilling.id }}</th>
+                    <td>{{ nybestilling.Bestillings_tid|date:'Y-m-d H:i:s' }}</td>
+                    <td>{{ nybestilling.Restaurant }}</td>
+                    <td>{{ nybestilling.KundeNavn }}</td>
+                    <td>{{ nybestilling.Leveringsadresse }}</td>
+                    <td>{{ nybestilling.Courier.get_full_name }}</td>
+                </tr>
+        </tbody>
+    </table>
+    {% else %}
+        <h1>Log in to see your orders</h1>
+    {% endif %}
+    <h1>Orders</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Date</th>
+                <th scope="col">Restaurant</th>
+                <th scope="col">Customer Name</th>
+                <th scope="col">Delivery Address</th>
+                <th scope="col">Courier</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nybestilling in NyBestilling %}
+                {% if nybestilling.Accepteret %}
+                <tr>
+                    <th scope="row" class="orderId">{{ nybestilling.id }}</th>
+                    <td>{{ nybestilling.Bestillings_tid|date:'Y-m-d H:i:s' }}</td>
+                    <td>{{ nybestilling.Restaurant }}</td>
+                    <td>{{ nybestilling.KundeNavn }}</td>
+                    <td>{{ nybestilling.Leveringsadresse }}</td>
+                    {% if nybestilling.Courier %}
+                        <td>{{ nybestilling.Courier.get_full_name }}</td>
+                    {% else %}
+                        <td>
+                            <button id="updateOrderButton" class="btn btn-primary">Take order</button>
+                        </td>
+                    {% endif %}
+                </tr>
+                {% endif %}
+
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <h1>Log in to see your orders</h1>
+{% endif %}
+
+<script>
+    document.getElementById('updateOrderButton').addEventListener('click', function() {
+            const orderId = this.closest('tr').querySelector('.orderId').textContent;
+            // Get the CSRF token from the cookie
+            const csrftoken = getCookie('csrftoken');
+        
+            fetch(`/api/orders/${orderId}/`, {
+                method: 'PATCH', 
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify({
+                    Courier_id: "{{ user.get_id }}", 
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Order updated successfully');
+                    window.location.reload();
+                } else {
+                    console.error('Failed to update order:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('Network error:', error);
+            });
+        });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+
+{% endblock %}

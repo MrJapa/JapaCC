@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %} Burro - Ordre {% endblock %}
+{% block title %} Burro - Bestil {% endblock %}
 
 {% block checkout %}
 {% load static %}
@@ -9,7 +9,7 @@
     <div class="card"> 
         <div id="map" style="object-fit: cover; height: 200px;"></div>
         <h2>Check ud</h2>
-        <h3>{{Restauranter.Navn}}</h3>
+        <h3 class="restaurant">{{Restauranter.Navn}}</h3>
         <p>{{Restauranter.Adresse}}</p>
         <div class="card-body"> 
             <div class="row">
@@ -18,7 +18,7 @@
                     <p class="card-text" style="font-weight: bold;">Leveres til: </p>
                     {% if user.is_authenticated %}
                         <p class="card-text">{{user.address}}</p>
-                        <p id="travelTime"></p>
+                        <p id="travelTime" class="travelTime"></p>
                     {% else %}
                         <p class="card-text">Log ind for at ændre leveringsadresse</p>
                         <span id="location" class="ms-3 bi-house-door-fill"></span>
@@ -51,10 +51,10 @@
                                     <p style="font-weight: bold;">I alt</p>
                                 </div>
                                 <div class="col-md-4"> 
-                                    <p class="total-price"></p>
+                                    <p id="total-price" class="total-price"></p>
                                 </div>
                             </div>                                                                  
-                            <a href="#" class="btn btn-primary">Klik for at bestille</a> 
+                            <a href="#" id="createOrderButton" class="btn btn-primary" >Klik for at bestille</a> 
                         </div>                                 
                     </div>                                     
                     </div>                                                          
@@ -66,6 +66,81 @@
 </div>
 
 <script>
+
+    document.getElementById('createOrderButton').addEventListener('click', function() {
+        // Get the CSRF token from the cookie
+        const csrftoken = getCookie('csrftoken');
+    
+        var totalPriceElement = document.getElementById("total-price")
+        var totalPrice = totalPriceElement.textContent; // Get the text content and remove any leading or trailing whitespace
+
+        // Get the travel time from the HTML
+        var travelTimeElement = document.getElementById("travelTime");
+        var travelTime = travelTimeElement.textContent; // Get the text content and remove any leading or trailing whitespace
+
+        var items = JSON.parse(localStorage.getItem("items"));
+
+        var madItems = [];
+
+        user_full_name = "{{ user.first_name }}" + " " +"{{ user.last_name }}";
+
+        if (items && items.length > 0) {
+        // Loop through each item in the array to add them to the "Mad" array
+        items.forEach(function(item) {
+            // Push each item's MadId to the "Mad" array
+            madItems.push(item.MadId.toString()); // Convert MadId to string and push to array
+        });
+}
+
+        fetch('/api/orders/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,  
+
+            },
+            body: JSON.stringify({
+                // Include data for creating the order
+                "Kunde": "{{ user.get_id}}",
+                "KundeNavn": "{{ user.first_name }} {{ user.last_name}}",
+                "Restaurant": "{{ Restauranter.id }}",
+                "Mad": madItems.concat().toString(),
+                "Leveringsadresse": "{{ user.address|escapejs }}",
+                "Leveringsgebyr": "{{ Restauranter.Leveringsgebyr }}",
+                "Total_pris": totalPrice ,
+                "Leverings_tid": travelTime,
+                "Dørnummer": "{{ user.door_number }}"
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Order created successfully');
+            } else {
+                console.error('Failed to create order:', response.status);
+            }
+        })
+        .catch(error => {
+            console.error('Network error:', error);
+        });
+    });
+    
+    // Function to get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Check if the cookie name matches the CSRF token cookie name
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
 
 function initMap() {
     var restaurantAddress = "{{ Restauranter.Adresse }}";
@@ -129,23 +204,20 @@ function initMap() {
 
 // Function to create and append a new item card
 function createItemCard(itemName, itemCount, itemDescription, itemPrice, itemImage) {
-    // Create a div element for the card
+
     var cardDiv = document.createElement("div");
     cardDiv.className = "align-items-center card flex-row";
 
-    // Create an img element for the item image
     var img = document.createElement("img");
     img.src = "data:image/jpeg;base64," + itemImage;
     img.alt = "Item Image";
     img.className = "card-img-top w-auto";
-    img.width = 0; // Adjust as needed
-    img.height = 100; // Adjust as needed
+    img.width = 0; 
+    img.height = 100; 
 
-    // Create a div element for the card body
     var cardBodyDiv = document.createElement("div");
     cardBodyDiv.className = "card-body";
 
-    // Create a paragraph element for the "X" button
     var closeButton = document.createElement("p");
     closeButton.textContent = "X";
     closeButton.className = "text-end";
@@ -155,42 +227,34 @@ function createItemCard(itemName, itemCount, itemDescription, itemPrice, itemIma
         removeOneItemFromLocalStorage(itemName);
     };
 
-    // Create a heading element for the item name
     var itemNameHeading = document.createElement("h4");
     itemNameHeading.className = "card-title";
 
-    // Append item name with count if count > 1
     if (itemCount > 1) {
         itemNameHeading.textContent = itemName + " (" + itemCount + ")";
     } else {
         itemNameHeading.textContent = itemName;
     }
 
-    // Create a paragraph element for the item description
     var itemDescriptionParagraph = document.createElement("p");
     itemDescriptionParagraph.className = "card-text";
     itemDescriptionParagraph.textContent = itemDescription;
 
-    // Create a paragraph element for the item price
     var itemPriceParagraph = document.createElement("p");
     itemPriceParagraph.className = "card-text";
     itemPriceParagraph.textContent = parseFloat(itemPrice).toFixed(2) + " kr.";
 
-    // Append elements to the card body div
     cardBodyDiv.appendChild(closeButton);
     cardBodyDiv.appendChild(itemNameHeading);
     cardBodyDiv.appendChild(itemDescriptionParagraph);
     cardBodyDiv.appendChild(itemPriceParagraph);
 
-    // Append elements to the card div
     cardDiv.appendChild(img);
     cardDiv.appendChild(cardBodyDiv);
 
-    // Append the card div to the items list
     itemsList.appendChild(cardDiv);
 }
 
-// Function to remove one instance of an item from local storage
 function removeOneItemFromLocalStorage(itemName) {
     // Retrieve items from local storage
     var items = JSON.parse(localStorage.getItem("items"));
@@ -216,15 +280,12 @@ function removeOneItemFromLocalStorage(itemName) {
 // Retrieve items from local storage
 var items = JSON.parse(localStorage.getItem("items"));
 
-// Get the div where we will add the item cards
 var itemsList = document.getElementById("items");
 
-// Check if items is not null
 if (items && items.length > 0) {
     // Create a map to store the count of each item
     var itemCounts = {};
 
-    // Total price of all items
     var totalPrice = 0;
 
     // Loop through each item in the array to count occurrences and create unique items
@@ -237,18 +298,13 @@ if (items && items.length > 0) {
         totalPrice += parseFloat(item.MadPris);
     });
 
-    // Delivery fee
     var deliveryFee = parseFloat("{{Restauranter.Leveringsgebyr}}");
 
-    // Service fee
-    var serviceFee = 10.00; // Assuming service fee is always 10.00 kr.
+    var serviceFee = 10.00; 
 
-    // Calculate total price including delivery fee and service fee
     var totalPriceWithFees = totalPrice + deliveryFee + serviceFee;
 
-    // Loop through each unique item in the map to create item cards
     for (var itemName in itemCounts) {
-        // Get the count of the item
         var count = itemCounts[itemName];
 
         // Get the item associated with the itemName
@@ -260,7 +316,6 @@ if (items && items.length > 0) {
         createItemCard(itemName, count, item.MadBeskrivelse, item.MadPris, item.MadBillede);
     }
 
-    // Update the actual price element with the total price
     document.querySelector("p.actual-price").textContent = totalPrice.toFixed(2);
     document.querySelector("p.delivery-fee").textContent = deliveryFee.toFixed(2);
     document.querySelector("p.service-fee").textContent = serviceFee.toFixed(2);
@@ -268,11 +323,5 @@ if (items && items.length > 0) {
 } else {
     console.log("No items in local storage or items is empty.");
 }
-
-
 </script>
-
-
-
-
 {% endblock %}

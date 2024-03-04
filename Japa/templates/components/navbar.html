@@ -28,6 +28,9 @@
                     {% if user.is_superuser %}
                         <li><a class="dropdown-item" href="{% url 'manage' %}">Admin</a></li>
                     {% endif %}
+                    {% if user.is_courier %}
+                        <li><a class="dropdown-item" href="{% url 'orders' %}">Orders</a></li>
+                    {% endif %}
                     <li>
                         <a class="dropdown-item" href="{% url 'logout' %}">Log ud</a>
                     </li>

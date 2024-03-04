@@ -7,9 +7,7 @@ from datetime import timedelta
 from .models import CustomUser
 from .forms import *
 from .models import *
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.utils import timezone
+
 
 # Create your views here.
 def index(request):
@@ -17,16 +15,20 @@ def index(request):
     kategorier = NyKategori.objects.all()
     return render(request, 'index.html', {'user': request.user, 'Restauranter': restauranter, 'Kategorier': kategorier})
 
-@require_POST
-def create_bestilling(request):
-    if request.method == 'POST':
-        data = request.POST
-
-
-
 def logout_view(request):
     logout(request)
     return redirect('index')
+
+def orders_view(request):
+    restauranter = NyRestaurant.objects.all()
+    kategorier = NyKategori.objects.all()
+    underkategorier = NyUnderkategori.objects.all()
+    nytmad = NytMad.objects.all()
+    nybestilling = NyBestilling.objects.filter(Accepteret=True).order_by('Courier')
+    context = {
+        'nybestilling': nybestilling,
+    }
+    return render(request, 'orders.html', {'user': request.user, 'Restauranter': restauranter, 'Underkategorier': underkategorier, 'NytMad': nytmad, 'NyBestilling': nybestilling, 'Kategorier': kategorier})
 
 def restaurant_detail(request, Navn):
     restauranter = get_object_or_404(NyRestaurant, Navn=Navn)
@@ -53,6 +55,7 @@ def checkout_view(request, Navn):
     restauranter = get_object_or_404(NyRestaurant, Navn=Navn)
     underkategorier_set = set()
     nytmad_set = set()
+    
 
 
     # Assuming NyRestaurant has a Many-to-Many relationship with NyKategori, and NyKategori has a Many-to-Many relationship with NyUnderkategori

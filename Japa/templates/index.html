@@ -45,6 +45,8 @@
 
 
 {% block album %}
+{% load static %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBW_jesOr5SWZqSnXfIsCyEN0Ee4gYLhN8&callback=initMap" async defer></script>
 <div>
     <h1>Restauranter</h1>
 </div>
@@ -61,14 +63,13 @@
                         <div class="card-body">
                             <div class="m-0">
                                 <div class="row m-0 g-0">
-                                    <div class="col-10">
+                                    <div class="col-9">
                                         <h4 class="text-break" style="text-wrap: nowrap; font-size: large;">{{ Restaurant.Navn }}</h4>
                                         <p style="color: rgb(85, 84, 90);">{{ Restaurant.Beskrivelse }}</p>
                                     </div>
                                     <div class="col rounded m-0"
-                                        style="background-color: #EBF7FD; height: fit-content; width: 35px;">
-                                        <p class="text-center m-0"
-                                            style="color: #00A8E7; font-weight: 450; text-wrap: nowrap;">10-15</p>
+                                        style="background-color: #EBF7FD; height: fit-content; width: 40px;">
+                                        <p class="travelTime m-0 text-center" style="color: #00A8E7; font-weight:400;" data-restaurant-address="{{ Restaurant.Adresse }}"></p>
                                         <p class="text-center m-0" style="color: #00A8E7; font-weight:400;">min</p>
                                     </div>
                                 </div>
@@ -95,4 +96,55 @@
         </div>
     </div>
 </div>
+<script>
+function initMap() {
+    var geocoder = new google.maps.Geocoder();
+    var restaurants = document.querySelectorAll('.travelTime');
+
+    restaurants.forEach(function(restaurantElement) {
+        var restaurantAddress = restaurantElement.getAttribute('data-restaurant-address');
+        var destinationAddress = "{{ user.address }}"; // Ensure user address is accessible
+
+        geocoder.geocode({ address: restaurantAddress }, function(results1, status1) {
+            if (status1 === 'OK') {
+                var restaurantLocation = results1[0].geometry.location;
+
+                geocoder.geocode({ address: destinationAddress }, function(results2, status2) {
+                    if (status2 === 'OK') {
+                        var destinationLocation = results2[0].geometry.location;
+
+                        var service = new google.maps.DistanceMatrixService();
+                        service.getDistanceMatrix({
+                            origins: [restaurantAddress],
+                            destinations: [destinationAddress],
+                            travelMode: google.maps.TravelMode.DRIVING,
+                            unitSystem: google.maps.UnitSystem.METRIC,
+                            avoidHighways: false,
+                            avoidTolls: false
+                        }, function(response, status) {
+                            if (status == 'OK') {
+                                var distance = response.rows[0].elements[0].distance.text;
+                                var durationInSeconds = response.rows[0].elements[0].duration.value;
+                                var roundedDurationInSeconds = Math.ceil(durationInSeconds / 300) * 300; // Round up to the next multiple of 300 seconds (5 minutes)
+                                var durationInMinutes = Math.ceil(roundedDurationInSeconds / 60); // Convert to minutes
+                                var finalDuration = durationInMinutes + 5; // Add an additional 5 minutes
+                                restaurantElement.innerHTML = durationInMinutes + " - " + finalDuration;
+                            } else {
+                                console.error('Error calculating distance: ' + status);
+                            }
+                        });
+                    } else {
+                        console.error('Geocode was not successful for the destination address: ' + status2);
+                    }
+                });
+            } else {
+                console.error('Geocode was not successful for the restaurant address: ' + status1);
+            }
+        });
+    });
+}
+
+// Call initMap function when page is loaded
+window.onload = initMap;
+</script>
 {% endblock %}
