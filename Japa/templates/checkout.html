@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %} Burro - Ordre {% endblock %}
+{% block title %} Burro - Bestil {% endblock %}
 
 {% block checkout %}
 {% load static %}
@@ -71,13 +71,26 @@
         // Get the CSRF token from the cookie
         const csrftoken = getCookie('csrftoken');
     
-        var totalPriceElement = document.querySelector("p.total-price").textContent
-        var totalPrice = totalPriceElement.textContent.trim(); // Get the text content and remove any leading or trailing whitespace
+        var totalPriceElement = document.getElementById("total-price")
+        var totalPrice = totalPriceElement.textContent; // Get the text content and remove any leading or trailing whitespace
 
         // Get the travel time from the HTML
         var travelTimeElement = document.getElementById("travelTime");
         var travelTime = travelTimeElement.textContent; // Get the text content and remove any leading or trailing whitespace
 
+        var items = JSON.parse(localStorage.getItem("items"));
+
+        var madItems = [];
+
+        user_full_name = "{{ user.first_name }}" + " " +"{{ user.last_name }}";
+
+        if (items && items.length > 0) {
+        // Loop through each item in the array to add them to the "Mad" array
+        items.forEach(function(item) {
+            // Push each item's MadId to the "Mad" array
+            madItems.push(item.MadId.toString()); // Convert MadId to string and push to array
+        });
+}
 
         // Send a POST request to the API endpoint
         fetch('/api/orders/', {
@@ -90,13 +103,15 @@
             body: JSON.stringify({
                 // Include data for creating the order
                 // Adjust the data based on your requirements
-                "Kunde": 1,
-                "Restaurant": 1,
-                "Mad": "Cheeseburger",
+                "Kunde": "{{ user.get_id}}",
+                "KundeNavn": "{{ user.first_name }} {{ user.last_name}}",
+                "Restaurant": "{{ Restauranter.id }}",
+                "Mad": madItems.concat().toString(),
                 "Leveringsadresse": "{{ user.address|escapejs }}",
                 "Leveringsgebyr": "{{ Restauranter.Leveringsgebyr }}",
-                "Total_pris:" totalPrice,
-                "Leverings_tid" : travelTime
+                "Total_pris": totalPrice ,
+                "Leverings_tid": travelTime,
+                "Dørnummer": "{{ user.door_number }}"
                 // Add other fields as needed
             })
         })

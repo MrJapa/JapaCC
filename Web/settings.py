@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'gunicorn',
     'psycopg2',
     'dj_database_url',
+    'django_extensions',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap4'

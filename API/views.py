@@ -1,6 +1,7 @@
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
+from rest_framework import generics
 from Japa.models import NyBestilling
 from .serializers import NyBestillingSerializer
 
@@ -11,3 +12,24 @@ def create_order(request):
         serializer.save()
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
+
+@api_view(['PUT'])
+def take_order(request):
+    if request.method == 'PUT':
+        nybestilling_id = request.data.get('nybestilling_id')
+        nybestilling = NyBestilling.objects.get(id=nybestilling_id)
+
+        # Set the courier_id to the ID of the logged-in user
+        nybestilling.courier_id = request.user.id
+        nybestilling.save()
+
+        serializer = NyBestillingSerializer(nybestilling)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': 'Invalid request method.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class NyBestillingUpdateAPIView(generics.UpdateAPIView):
+    queryset = NyBestilling.objects.all()
+    serializer_class = NyBestillingSerializer
+    lookup_field = 'pk'

@@ -5,3 +5,4 @@ class NyBestillingSerializer(serializers.ModelSerializer):
     class Meta:
         model = NyBestilling
         fields = '__all__'
+

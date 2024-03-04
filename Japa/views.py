@@ -15,10 +15,20 @@ def index(request):
     kategorier = NyKategori.objects.all()
     return render(request, 'index.html', {'user': request.user, 'Restauranter': restauranter, 'Kategorier': kategorier})
 
-
 def logout_view(request):
     logout(request)
     return redirect('index')
+
+def orders_view(request):
+    restauranter = NyRestaurant.objects.all()
+    kategorier = NyKategori.objects.all()
+    underkategorier = NyUnderkategori.objects.all()
+    nytmad = NytMad.objects.all()
+    nybestilling = NyBestilling.objects.filter(Accepteret=True).order_by('Courier')
+    context = {
+        'nybestilling': nybestilling,
+    }
+    return render(request, 'orders.html', {'user': request.user, 'Restauranter': restauranter, 'Underkategorier': underkategorier, 'NytMad': nytmad, 'NyBestilling': nybestilling, 'Kategorier': kategorier})
 
 def restaurant_detail(request, Navn):
     restauranter = get_object_or_404(NyRestaurant, Navn=Navn)
