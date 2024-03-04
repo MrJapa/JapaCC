@@ -23,5 +23,6 @@ pwa = True
 urlpatterns = [
     path('', include('Japa.urls')),
     path('admin/', admin.site.urls),
+    path('api/', include('API.urls')),
     re_path('', include('pwa.urls')),
 ] #+ ([path('', include('Japa.urls')),] if not pwa else [path('', include('pwa.urls')),])

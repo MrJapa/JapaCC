@@ -9,7 +9,7 @@
     <div class="card"> 
         <div id="map" style="object-fit: cover; height: 200px;"></div>
         <h2>Check ud</h2>
-        <h3>{{Restauranter.Navn}}</h3>
+        <h3 class="restaurant">{{Restauranter.Navn}}</h3>
         <p>{{Restauranter.Adresse}}</p>
         <div class="card-body"> 
             <div class="row">
@@ -18,7 +18,7 @@
                     <p class="card-text" style="font-weight: bold;">Leveres til: </p>
                     {% if user.is_authenticated %}
                         <p class="card-text">{{user.address}}</p>
-                        <p id="travelTime"></p>
+                        <p id="travelTime" class="travelTime"></p>
                     {% else %}
                         <p class="card-text">Log ind for at ændre leveringsadresse</p>
                         <span id="location" class="ms-3 bi-house-door-fill"></span>
@@ -51,10 +51,10 @@
                                     <p style="font-weight: bold;">I alt</p>
                                 </div>
                                 <div class="col-md-4"> 
-                                    <p class="total-price"></p>
+                                    <p id="total-price" class="total-price"></p>
                                 </div>
                             </div>                                                                  
-                            <a href="#" class="btn btn-primary">Klik for at bestille</a> 
+                            <a href="#" id="createOrderButton" class="btn btn-primary" >Klik for at bestille</a> 
                         </div>                                 
                     </div>                                     
                     </div>                                                          
@@ -66,6 +66,72 @@
 </div>
 
 <script>
+
+    document.getElementById('createOrderButton').addEventListener('click', function() {
+        // Get the CSRF token from the cookie
+        const csrftoken = getCookie('csrftoken');
+    
+        var totalPriceElement = document.querySelector("p.total-price").textContent
+        var totalPrice = totalPriceElement.textContent.trim(); // Get the text content and remove any leading or trailing whitespace
+
+        // Get the travel time from the HTML
+        var travelTimeElement = document.getElementById("travelTime");
+        var travelTime = travelTimeElement.textContent; // Get the text content and remove any leading or trailing whitespace
+
+
+        // Send a POST request to the API endpoint
+        fetch('/api/orders/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,  // Include the CSRF token in the headers
+                // Include any other headers if required
+            },
+            body: JSON.stringify({
+                // Include data for creating the order
+                // Adjust the data based on your requirements
+                "Kunde": 1,
+                "Restaurant": 1,
+                "Mad": "Cheeseburger",
+                "Leveringsadresse": "{{ user.address|escapejs }}",
+                "Leveringsgebyr": "{{ Restauranter.Leveringsgebyr }}",
+                "Total_pris:" totalPrice,
+                "Leverings_tid" : travelTime
+                // Add other fields as needed
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Order created successfully
+                console.log('Order created successfully');
+            } else {
+                // Handle error response
+                console.error('Failed to create order:', response.status);
+            }
+        })
+        .catch(error => {
+            // Handle network error
+            console.error('Network error:', error);
+        });
+    });
+    
+    // Function to get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Check if the cookie name matches the CSRF token cookie name
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
 
 function initMap() {
     var restaurantAddress = "{{ Restauranter.Adresse }}";

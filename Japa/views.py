@@ -7,21 +7,13 @@ from datetime import timedelta
 from .models import CustomUser
 from .forms import *
 from .models import *
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.utils import timezone
+
 
 # Create your views here.
 def index(request):
     restauranter = NyRestaurant.objects.all()
     kategorier = NyKategori.objects.all()
     return render(request, 'index.html', {'user': request.user, 'Restauranter': restauranter, 'Kategorier': kategorier})
-
-@require_POST
-def create_bestilling(request):
-    if request.method == 'POST':
-        data = request.POST
-
 
 
 def logout_view(request):
@@ -53,6 +45,7 @@ def checkout_view(request, Navn):
     restauranter = get_object_or_404(NyRestaurant, Navn=Navn)
     underkategorier_set = set()
     nytmad_set = set()
+    
 
 
     # Assuming NyRestaurant has a Many-to-Many relationship with NyKategori, and NyKategori has a Many-to-Many relationship with NyUnderkategori

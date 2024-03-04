@@ -125,7 +125,7 @@ class NyBestilling(models.Model):
     Dørnummer = models.CharField(max_length=10, blank=True, null=True)
     Leveringsgebyr = models.FloatField()
     Total_pris = models.FloatField()
-    Leverings_tid = models.DateTimeField()
+    Leverings_tid = models.TextField()
     Bestillings_tid = models.DateTimeField(auto_now_add=True)
     Leveret = models.BooleanField(default=False)
     Afhentet = models.BooleanField(default=False)

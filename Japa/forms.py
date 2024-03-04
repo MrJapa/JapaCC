@@ -7,6 +7,11 @@ from django.core.exceptions import ValidationError
 class LoginForm(AuthenticationForm):
     pass
 
+class NyBestillingForm(forms.ModelForm):
+    class Meta:
+        model = NyBestilling
+        fields = ['Leveringsadresse', 'Leveringsadresse_type', 'Dørnummer', 'Leverings_tid', 'Leveringsgebyr', 'Total_pris']
+
 class NyKategoriForm(forms.ModelForm):
     Billede = forms.ImageField()
 
