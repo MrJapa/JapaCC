@@ -4,6 +4,36 @@
 {% block ordre %}
 
 {% if user.is_authenticated %}
+
+    <h1>My orders</h1>
+    {% if nybestilling.Courier.get_full_name == user.get_full_name %}
+    console.log("hej {{ user.get_full_name }}")
+    console.log("{{ nybestilling.Courier.get_full_name }}")
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Date</th>
+                <th scope="col">Restaurant</th>
+                <th scope="col">Customer Name</th>
+                <th scope="col">Delivery Address</th>
+                <th scope="col">Courier</th>
+            </tr>
+        </thead>
+        <tbody>
+                <tr>
+                    <th scope="row" class="orderId">{{ nybestilling.id }}</th>
+                    <td>{{ nybestilling.Bestillings_tid|date:'Y-m-d H:i:s' }}</td>
+                    <td>{{ nybestilling.Restaurant }}</td>
+                    <td>{{ nybestilling.KundeNavn }}</td>
+                    <td>{{ nybestilling.Leveringsadresse }}</td>
+                    <td>{{ nybestilling.Courier.get_full_name }}</td>
+                </tr>
+        </tbody>
+    </table>
+    {% else %}
+        <h1>Log in to see your orders</h1>
+    {% endif %}
     <h1>Orders</h1>
     <table class="table">
         <thead>
@@ -48,31 +78,25 @@
             // Get the CSRF token from the cookie
             const csrftoken = getCookie('csrftoken');
         
-            // Send a PUT request to update the order with the courier information
             fetch(`/api/orders/${orderId}/`, {
-                method: 'PATCH', // Use PATCH method to update specific fields
+                method: 'PATCH', 
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken,
-                    // Include any other headers if required
                 },
                 body: JSON.stringify({
-                    courier: "{{ user.id }}", // Pass the courier id here
+                    Courier_id: "{{ user.get_id }}", 
                 })
             })
             .then(response => {
                 if (response.ok) {
-                    // Order updated successfully
                     console.log('Order updated successfully');
-                    // Reload the page to reflect the changes
                     window.location.reload();
                 } else {
-                    // Handle error response
                     console.error('Failed to update order:', response.status);
                 }
             })
             .catch(error => {
-                // Handle network error
                 console.error('Network error:', error);
             });
         });

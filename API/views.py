@@ -13,9 +13,10 @@ def create_order(request):
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
 
-@api_view(['PUT'])
+# Unused
+@api_view(['PATCH'])
 def take_order(request):
-    if request.method == 'PUT':
+    if request.method == 'PATCH':
         nybestilling_id = request.data.get('nybestilling_id')
         nybestilling = NyBestilling.objects.get(id=nybestilling_id)
 
@@ -33,3 +34,9 @@ class NyBestillingUpdateAPIView(generics.UpdateAPIView):
     queryset = NyBestilling.objects.all()
     serializer_class = NyBestillingSerializer
     lookup_field = 'pk'
+
+    def perform_update(self, serializer):
+        courier_id = self.request.data.get('Courier_id')
+        if courier_id:
+            serializer.instance.Courier_id = courier_id
+        serializer.save()
