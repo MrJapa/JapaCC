@@ -4,6 +4,7 @@
 {% block ordre %}
 
 {% if user.is_authenticated %}
+    {% if user.is_courier %}
     <h1>Orders</h1>
     <table class="table">
         <thead>
@@ -38,11 +39,82 @@
             {% endfor %}
         </tbody>
     </table>
+    {% elif user.is_restaurant %}
+    <h1>Orders</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Date</th>
+                <th scope="col">Restaurant</th>
+                <th scope="col">Customer Name</th>
+                <th scope="col">Delivery Address</th>
+                <th scope="col">Accepted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nybestilling in NyBestilling %}
+                {% if not nybestilling.Accepteret %}
+                <tr>
+                    <th scope="row" class="orderId">{{ nybestilling.id }}</th>
+                    <td>{{ nybestilling.Bestillings_tid|date:'Y-m-d H:i:s' }}</td>
+                    <td>{{ nybestilling.Restaurant }}</td>
+                    <td>{{ nybestilling.KundeNavn }}</td>
+                    <td>{{ nybestilling.Leveringsadresse }}</td>
+                        {% if nybestilling.Restaurant %}
+                        <td>
+                            <button id="acceptOrderButton" class="btn btn-primary acceptOrderButton" data-order-id="{{ nybestilling.id }}">Accept order</button>
+                        </td>
+                        {% endif %}
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
 {% else %}
     <h1>Log in to see your orders</h1>
 {% endif %}
 
 <script>
+
+    document.querySelectorAll('.acceptOrderButton').forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-order-id');
+            // Get the CSRF token from the cookie
+            const csrftoken = getCookie('csrftoken');
+        
+            // Send a PATCH request to update the order's Accepted column
+            fetch(`/api/orders/${orderId}/`, {
+                method: 'PATCH', // Use PATCH method to update specific fields
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                    // Include any other headers if required
+                },
+                body: JSON.stringify({
+                    Accepteret: true, // Set accepted to true
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Order updated successfully
+                    console.log('Order accepted successfully');
+                    // Reload the page to reflect the changes
+                    window.location.reload();
+                } else {
+                    // Handle error response
+                    console.error('Failed to accept order:', response.status);
+                }
+            })
+            .catch(error => {
+                // Handle network error
+                console.error('Network error:', error);
+            });
+        });
+    });
+
     document.getElementById('updateOrderButton').addEventListener('click', function() {
             const orderId = this.closest('tr').querySelector('.orderId').textContent;
             // Get the CSRF token from the cookie

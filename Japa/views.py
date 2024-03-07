@@ -24,7 +24,7 @@ def orders_view(request):
     kategorier = NyKategori.objects.all()
     underkategorier = NyUnderkategori.objects.all()
     nytmad = NytMad.objects.all()
-    nybestilling = NyBestilling.objects.filter(Accepteret=True).order_by('Courier')
+    nybestilling = NyBestilling.objects.order_by('Courier')
     context = {
         'nybestilling': nybestilling,
     }

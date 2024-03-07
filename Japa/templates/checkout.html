@@ -54,8 +54,18 @@
                                     <p id="total-price" class="total-price"></p>
                                 </div>
                             </div>                                                                  
-                            <a href="#" id="createOrderButton" class="btn btn-primary" >Klik for at bestille</a> 
+                            <a href="#" id="createOrderButton" class="btn btn-primary">Klik for at bestille</a> 
                         </div>                                 
+                    </div>
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    Order created successfully!
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
                     </div>                                     
                     </div>                                                          
                 </div>
@@ -119,6 +129,14 @@
             if (response.ok) {
                 // Order created successfully
                 console.log('Order created successfully');
+                var successToast = new bootstrap.Toast(document.getElementById('successToast'));
+                successToast.show();
+
+                const redirectTo = '/orders/';
+                setTimeout(() => {
+                    window.location.href = redirectTo
+                }, 3000);
+
             } else {
                 // Handle error response
                 console.error('Failed to create order:', response.status);
