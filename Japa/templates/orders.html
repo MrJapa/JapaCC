@@ -71,6 +71,33 @@
             {% endfor %}
         </tbody>
     </table>
+    {% else %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Date</th>
+                <th scope="col">Restaurant</th>
+                <th scope="col">Customer Name</th>
+                <th scope="col">Delivery Address</th>
+                <th scope="col">Accepted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nybestilling in NyBestilling %}
+                {% if not nybestilling.Accepteret %}
+                <tr>
+                    <th scope="row" class="orderId">{{ nybestilling.id }}</th>
+                    <td>{{ nybestilling.Bestillings_tid|date:'Y-m-d H:i:s' }}</td>
+                    <td>{{ nybestilling.Restaurant }}</td>
+                    <td>{{ nybestilling.KundeNavn }}</td>
+                    <td>{{ nybestilling.Leveringsadresse }}</td>
+                    <td>{{ nybestilling.Accepteret }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
     {% endif %}
 
 {% else %}
