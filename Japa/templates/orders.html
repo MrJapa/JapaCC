@@ -86,7 +86,7 @@
             const csrftoken = getCookie('csrftoken');
         
             // Send a PATCH request to update the order's Accepted column
-            fetch(`/api/orders/${orderId}/`, {
+            fetch(`/api/orders/accept/${orderId}/`, {
                 method: 'PATCH', // Use PATCH method to update specific fields
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,7 +129,7 @@
                     // Include any other headers if required
                 },
                 body: JSON.stringify({
-                    courier: "{{ user.id }}", // Pass the courier id here
+                    Courier: "{{ user.id }}", // Pass the courier id here
                 })
             })
             .then(response => {
@@ -137,7 +137,7 @@
                     // Order updated successfully
                     console.log('Order updated successfully');
                     // Reload the page to reflect the changes
-                    window.location.reload();
+                    //window.location.reload();
                 } else {
                     // Handle error response
                     console.error('Failed to update order:', response.status);

@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
-from Japa.models import NyBestilling
+from Japa.models import NyBestilling, CustomUser
 from .serializers import NyBestillingSerializer
 
 @api_view(['POST'])
@@ -14,20 +14,34 @@ def create_order(request):
     return Response(serializer.errors, status=400)
 
 @api_view(['PATCH'])
-def take_order(request):
-    if request.method == 'PATCH':
-        nybestilling_id = request.data.get('nybestilling_id')
-        nybestilling = NyBestilling.objects.get(id=nybestilling_id)
+def take_order(request, pk):
+    try:
+        nybestilling = NyBestilling.objects.get(id=pk)
+    except NyBestilling.DoesNotExist:
+        return Response({'message': 'Order does not exist.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Set the courier_id to the ID of the logged-in user
-        nybestilling.courier_id = request.user.id
-        nybestilling.save()
+    # Set the courier_id to the ID of the logged-in user
+    print(request)
+    courier = CustomUser.objects.get(id=request.data.get('Courier'))
+    nybestilling.Courier = courier
+    nybestilling.save()
 
-        serializer = NyBestillingSerializer(nybestilling)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    else:
-        return Response({'message': 'Invalid request method.'}, status=status.HTTP_400_BAD_REQUEST)
+    serializer = NyBestillingSerializer(nybestilling)
+    return Response(serializer.data, status=status.HTTP_200_OK)
     
+
+@api_view(['PATCH'])
+def accept_order(request, pk):
+    try:
+        nybestilling = NyBestilling.objects.get(id=pk)
+    except NyBestilling.DoesNotExist:
+        return Response({'message': 'Order does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    nybestilling.Accepteret = True
+    nybestilling.save()
+
+    serializer = NyBestillingSerializer(nybestilling)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 class NyBestillingUpdateAPIView(generics.UpdateAPIView):
     queryset = NyBestilling.objects.all()
